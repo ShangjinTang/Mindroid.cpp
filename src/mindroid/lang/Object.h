@@ -210,6 +210,11 @@ public:
 
     void clear();
 
+    template<typename ... Args>
+    static sp<T> of(Args&& ... args) {
+        return new T(std::forward<Args>(args)...);
+    }
+
 private:
     template<typename Y> friend class sp;
     template<typename Y> friend class wp;
@@ -331,6 +336,11 @@ public:
 
     template<typename U> inline bool operator>=(const wp<U>& o) const {
         return !operator <(o);
+    }
+
+    template<typename ... Args>
+    static wp<T> of(Args&& ... args) {
+        return new T(std::forward<Args>(args)...);
     }
 
 private:
@@ -519,7 +529,8 @@ void sp<T>::setPointer(T* pointer) {
 
 template<typename T>
 wp<T>::wp(T* other) :
-        mPointer(other) {
+        mPointer(other),
+        mReference(nullptr) {
     if (other) {
         mReference = other->createWeakReference(this);
     }
@@ -527,7 +538,8 @@ wp<T>::wp(T* other) :
 
 template<typename T>
 wp<T>::wp(const wp<T>& other) :
-        mPointer(other.mPointer), mReference(other.mReference) {
+        mPointer(other.mPointer),
+        mReference(other.mReference) {
     if (mPointer) {
         mReference->incWeakReference(this);
     }
@@ -535,7 +547,8 @@ wp<T>::wp(const wp<T>& other) :
 
 template<typename T>
 wp<T>::wp(const sp<T>& other) :
-        mPointer(other.mPointer) {
+        mPointer(other.mPointer),
+        mReference(nullptr) {
     if (mPointer) {
         mReference = mPointer->createWeakReference(this);
     }
@@ -543,7 +556,8 @@ wp<T>::wp(const sp<T>& other) :
 
 template<typename T> template<typename U>
 wp<T>::wp(U* other) :
-        mPointer(other) {
+        mPointer(other),
+        mReference(nullptr) {
     if (other) {
         mReference = other->createWeakReference(this);
     }
@@ -551,7 +565,8 @@ wp<T>::wp(U* other) :
 
 template<typename T> template<typename U>
 wp<T>::wp(const wp<U>& other) :
-        mPointer(other.mPointer) {
+        mPointer(other.mPointer),
+        mReference(nullptr) {
     if (mPointer) {
         mReference = other.mReference;
         mReference->incWeakReference(this);
@@ -560,7 +575,8 @@ wp<T>::wp(const wp<U>& other) :
 
 template<typename T> template<typename U>
 wp<T>::wp(const sp<U>& other) :
-        mPointer(other.mPointer) {
+        mPointer(other.mPointer),
+        mReference(nullptr) {
     if (mPointer) {
         mReference = mPointer->createWeakReference(this);
     }
